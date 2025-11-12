@@ -3,6 +3,3 @@
 .env
 crates/*/target/
 examples/*/.env
-
-AGENTS.md
-docs/
