@@ -128,6 +128,17 @@ The supported networks are determined by which RPC URLs you provide:
 - If you set only `RPC_URL_BASE_SEPOLIA`, then only Base Sepolia network is supported.
 - If you set both `RPC_URL_BASE_SEPOLIA` and `RPC_URL_BASE`, then both Base Sepolia and Base Mainnet are supported.
 - If an RPC URL for a network is missing, that network will not be available for settlement or verification.
+- Hyperliquid mainnet/testnet facilitators can be enabled independently of EVM/Solana flows. Set `HYPERLIQUID_ENV=mainnet` (or `testnet`) to opt in, optionally overriding endpoints with the variables below.
+
+##### Hyperliquid configuration (optional)
+
+| Variable | Description |
+| --- | --- |
+| `HYPERLIQUID_ENV` | Selects which Hyperliquid network should be instantiated (`mainnet` or `testnet`). When unset, Hyperliquid providers are skipped entirely. |
+| `HYPERLIQUID_BASE_URL` | Overrides the Info API endpoint (defaults to the SDK’s `https://api.hyperliquid{,-testnet}.xyz`). |
+| `HYPERLIQUID_EXCHANGE_URL` | Overrides the Exchange API endpoint (defaults to `<BASE_URL>/exchange`). |
+| `HYPERLIQUID_POLL_INTERVAL_MS` | Optional delay (ms) between settlement confirmation polls, defaults to 500ms. |
+| `HYPERLIQUID_POLL_TIMEOUT_MS` | Optional deadline (ms) for settlement confirmation, defaults to 20s. |
 
 #### 2. Build and Run with Docker
 

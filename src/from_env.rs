@@ -22,6 +22,11 @@ pub const ENV_RPC_POLYGON_AMOY: &str = "RPC_URL_POLYGON_AMOY";
 pub const ENV_RPC_POLYGON: &str = "RPC_URL_POLYGON";
 pub const ENV_RPC_SEI: &str = "RPC_URL_SEI";
 pub const ENV_RPC_SEI_TESTNET: &str = "RPC_URL_SEI_TESTNET";
+pub const ENV_HYPERLIQUID_ENV: &str = "HYPERLIQUID_ENV";
+pub const ENV_HYPERLIQUID_BASE_URL: &str = "HYPERLIQUID_BASE_URL";
+pub const ENV_HYPERLIQUID_EXCHANGE_URL: &str = "HYPERLIQUID_EXCHANGE_URL";
+pub const ENV_HYPERLIQUID_POLL_INTERVAL_MS: &str = "HYPERLIQUID_POLL_INTERVAL_MS";
+pub const ENV_HYPERLIQUID_POLL_TIMEOUT_MS: &str = "HYPERLIQUID_POLL_TIMEOUT_MS";
 
 pub fn rpc_env_name_from_network(network: Network) -> &'static str {
     match network {
@@ -36,7 +41,65 @@ pub fn rpc_env_name_from_network(network: Network) -> &'static str {
         Network::Polygon => ENV_RPC_POLYGON,
         Network::Sei => ENV_RPC_SEI,
         Network::SeiTestnet => ENV_RPC_SEI_TESTNET,
+        Network::HyperliquidMainnet | Network::HyperliquidTestnet => {
+            panic!("Hyperliquid networks do not have RPC endpoints")
+        }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HyperliquidEnvironment {
+    Mainnet,
+    Testnet,
+}
+
+impl HyperliquidEnvironment {
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value.to_ascii_lowercase().as_str() {
+            "mainnet" => Some(HyperliquidEnvironment::Mainnet),
+            "testnet" => Some(HyperliquidEnvironment::Testnet),
+            _ => None,
+        }
+    }
+
+    pub fn matches(&self, network: Network) -> bool {
+        match (self, network) {
+            (HyperliquidEnvironment::Mainnet, Network::HyperliquidMainnet) => true,
+            (HyperliquidEnvironment::Testnet, Network::HyperliquidTestnet) => true,
+            _ => false,
+        }
+    }
+}
+
+pub fn hyperliquid_env_from_env()
+-> Result<Option<HyperliquidEnvironment>, Box<dyn std::error::Error>> {
+    match env::var(ENV_HYPERLIQUID_ENV) {
+        Ok(value) => HyperliquidEnvironment::from_str(value.trim())
+            .ok_or_else(|| format!("Invalid {ENV_HYPERLIQUID_ENV} value: {value}").into())
+            .map(Some),
+        Err(env::VarError::NotPresent) => Ok(None),
+        Err(err) => Err(Box::new(err)),
+    }
+}
+
+pub fn hyperliquid_base_url_override() -> Option<String> {
+    env::var(ENV_HYPERLIQUID_BASE_URL).ok()
+}
+
+pub fn hyperliquid_exchange_url_override() -> Option<String> {
+    env::var(ENV_HYPERLIQUID_EXCHANGE_URL).ok()
+}
+
+pub fn hyperliquid_poll_interval_ms() -> Option<u64> {
+    env::var(ENV_HYPERLIQUID_POLL_INTERVAL_MS)
+        .ok()
+        .and_then(|value| value.parse().ok())
+}
+
+pub fn hyperliquid_poll_timeout_ms() -> Option<u64> {
+    env::var(ENV_HYPERLIQUID_POLL_TIMEOUT_MS)
+        .ok()
+        .and_then(|value| value.parse().ok())
 }
 
 /// Supported methods for constructing an Ethereum wallet from environment variables.

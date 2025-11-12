@@ -281,11 +281,25 @@ pub struct ExactSolanaPayload {
     pub transaction: String,
 }
 
+/// Hyperliquid-specific payload describing a user-signed action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExactHyperliquidPayload {
+    pub payer: MixedAddress,
+    pub action: serde_json::Value,
+    pub signature: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub signature_chain_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hyperliquid_chain: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ExactPaymentPayload {
     Evm(ExactEvmPayload),
     Solana(ExactSolanaPayload),
+    Hyperliquid(ExactHyperliquidPayload),
 }
 
 /// Describes a signed request to transfer a specific amount of funds on-chain.
@@ -787,11 +801,11 @@ impl<'de> Deserialize<'de> for TransactionHash {
         }
 
         // Solana: base58 string, decodes to exactly 64 bytes
-        if let Ok(bytes) = bs58::decode(&s).into_vec()
-            && bytes.len() == 64
-        {
-            let array: [u8; 64] = bytes.try_into().unwrap(); // safe after length check
-            return Ok(TransactionHash::Solana(array));
+        if let Ok(bytes) = bs58::decode(&s).into_vec() {
+            if bytes.len() == 64 {
+                let array: [u8; 64] = bytes.try_into().unwrap(); // safe after length check
+                return Ok(TransactionHash::Solana(array));
+            }
         }
 
         Err(serde::de::Error::custom("Invalid transaction hash format"))

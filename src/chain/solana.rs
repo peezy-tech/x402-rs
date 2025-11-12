@@ -46,6 +46,9 @@ impl TryFrom<Network> for SolanaChain {
             Network::Polygon => Err(FacilitatorLocalError::UnsupportedNetwork(None)),
             Network::Sei => Err(FacilitatorLocalError::UnsupportedNetwork(None)),
             Network::SeiTestnet => Err(FacilitatorLocalError::UnsupportedNetwork(None)),
+            Network::HyperliquidMainnet | Network::HyperliquidTestnet => {
+                Err(FacilitatorLocalError::UnsupportedNetwork(None))
+            }
         }
     }
 }
@@ -413,6 +416,9 @@ impl SolanaProvider {
                 return Err(FacilitatorLocalError::UnsupportedNetwork(None));
             }
             ExactPaymentPayload::Solana(payload) => payload,
+            ExactPaymentPayload::Hyperliquid(..) => {
+                return Err(FacilitatorLocalError::UnsupportedNetwork(None));
+            }
         };
         if payload.network != self.network() {
             return Err(FacilitatorLocalError::NetworkMismatch(

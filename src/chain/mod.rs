@@ -1,6 +1,7 @@
 use std::time::SystemTimeError;
 
 use crate::chain::evm::EvmProvider;
+use crate::chain::hyperliquid::HyperliquidProvider;
 use crate::chain::solana::SolanaProvider;
 use crate::facilitator::Facilitator;
 use crate::network::{Network, NetworkFamily};
@@ -10,11 +11,13 @@ use crate::types::{
 };
 
 pub mod evm;
+pub mod hyperliquid;
 pub mod solana;
 
 pub enum NetworkProvider {
     Evm(EvmProvider),
     Solana(SolanaProvider),
+    Hyperliquid(HyperliquidProvider),
 }
 
 pub trait FromEnvByNetworkBuild: Sized {
@@ -35,6 +38,10 @@ impl FromEnvByNetworkBuild for NetworkProvider {
                 let provider = SolanaProvider::from_env(network).await?;
                 provider.map(NetworkProvider::Solana)
             }
+            NetworkFamily::Hyperliquid => {
+                let provider = HyperliquidProvider::from_env(network).await?;
+                provider.map(NetworkProvider::Hyperliquid)
+            }
         };
         Ok(provider)
     }
@@ -50,6 +57,7 @@ impl NetworkProviderOps for NetworkProvider {
         match self {
             NetworkProvider::Evm(provider) => provider.signer_address(),
             NetworkProvider::Solana(provider) => provider.signer_address(),
+            NetworkProvider::Hyperliquid(provider) => provider.signer_address(),
         }
     }
 
@@ -57,6 +65,7 @@ impl NetworkProviderOps for NetworkProvider {
         match self {
             NetworkProvider::Evm(provider) => provider.network(),
             NetworkProvider::Solana(provider) => provider.network(),
+            NetworkProvider::Hyperliquid(provider) => provider.network(),
         }
     }
 }
@@ -68,6 +77,7 @@ impl Facilitator for NetworkProvider {
         match self {
             NetworkProvider::Evm(provider) => provider.verify(request).await,
             NetworkProvider::Solana(provider) => provider.verify(request).await,
+            NetworkProvider::Hyperliquid(provider) => provider.verify(request).await,
         }
     }
 
@@ -75,6 +85,7 @@ impl Facilitator for NetworkProvider {
         match self {
             NetworkProvider::Evm(provider) => provider.settle(request).await,
             NetworkProvider::Solana(provider) => provider.settle(request).await,
+            NetworkProvider::Hyperliquid(provider) => provider.settle(request).await,
         }
     }
 
@@ -82,6 +93,7 @@ impl Facilitator for NetworkProvider {
         match self {
             NetworkProvider::Evm(provider) => provider.supported().await,
             NetworkProvider::Solana(provider) => provider.supported().await,
+            NetworkProvider::Hyperliquid(provider) => provider.supported().await,
         }
     }
 }

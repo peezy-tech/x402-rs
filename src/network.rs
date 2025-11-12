@@ -51,6 +51,12 @@ pub enum Network {
     /// Sei testnet (chain ID 1328).
     #[serde(rename = "sei-testnet")]
     SeiTestnet,
+    /// Hyperliquid Mainnet off-chain L1.
+    #[serde(rename = "hyperliquid")]
+    HyperliquidMainnet,
+    /// Hyperliquid Testnet environment.
+    #[serde(rename = "hyperliquid-testnet")]
+    HyperliquidTestnet,
 }
 
 impl Display for Network {
@@ -67,6 +73,8 @@ impl Display for Network {
             Network::Polygon => write!(f, "polygon"),
             Network::Sei => write!(f, "sei"),
             Network::SeiTestnet => write!(f, "sei-testnet"),
+            Network::HyperliquidMainnet => write!(f, "hyperliquid"),
+            Network::HyperliquidTestnet => write!(f, "hyperliquid-testnet"),
         }
     }
 }
@@ -75,6 +83,7 @@ impl Display for Network {
 pub enum NetworkFamily {
     Evm,
     Solana,
+    Hyperliquid,
 }
 
 impl From<Network> for NetworkFamily {
@@ -91,6 +100,8 @@ impl From<Network> for NetworkFamily {
             Network::Polygon => NetworkFamily::Evm,
             Network::Sei => NetworkFamily::Evm,
             Network::SeiTestnet => NetworkFamily::Evm,
+            Network::HyperliquidMainnet => NetworkFamily::Hyperliquid,
+            Network::HyperliquidTestnet => NetworkFamily::Hyperliquid,
         }
     }
 }
@@ -110,6 +121,8 @@ impl Network {
             Network::Polygon,
             Network::Sei,
             Network::SeiTestnet,
+            Network::HyperliquidMainnet,
+            Network::HyperliquidTestnet,
         ]
     }
 }
@@ -322,6 +335,9 @@ impl USDCDeployment {
             Network::Polygon => &USDC_POLYGON,
             Network::Sei => &USDC_SEI,
             Network::SeiTestnet => &USDC_SEI_TESTNET,
+            Network::HyperliquidMainnet | Network::HyperliquidTestnet => {
+                panic!("Hyperliquid networks do not have canonical USDC deployments")
+            }
         }
     }
 }

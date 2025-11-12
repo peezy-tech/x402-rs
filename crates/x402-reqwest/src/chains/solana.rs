@@ -82,6 +82,7 @@ impl SenderWallet for SolanaSenderWallet {
         match network_family {
             NetworkFamily::Evm => false,
             NetworkFamily::Solana => true,
+            NetworkFamily::Hyperliquid => false,
         }
     }
 

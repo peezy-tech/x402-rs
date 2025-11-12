@@ -57,6 +57,7 @@ impl SenderWallet for EvmSenderWallet {
         match network_family {
             NetworkFamily::Evm => true,
             NetworkFamily::Solana => false,
+            NetworkFamily::Hyperliquid => false,
         }
     }
 
